@@ -1,0 +1,27 @@
+export const elements = {
+	rememberMeCheckboxAdminPortal: "//label[normalize-space()='Remember for 30 days']",
+	selectedFilter: (status: string) => `(//span[@class='v-chip__content' and normalize-space()='${status}'])[1]`,
+	removeFilter: (status: string) => `(//span[normalize-space()='${status}']//*[@class='search-cross-icon'])[1]`,
+	sideBar: {
+		accounts: "//a[@href='/accounts']",
+		accountsMenuSelected: "//a[@href='/accounts' and contains(@class, 'v-list-item--active')]",
+		users: "a[href=\"/users\"]",
+		usersMenuSelected: "//a[@href='/users' and contains(@class, 'v-list-item--active')]",
+		subscriptions: "a[href=\"/subscriptions\"]",
+		subscriptionsMenuSelected: "//a[@href='/subscriptions' and contains(@class, 'v-list-item--active')]",
+		logoutButton: "//span[@class='logout-icon-box']",
+	},
+	account: {
+		searchbar: "div[data-testid=\"ex-searchbar\"] input[data-testid=\"search-input\"]",
+		accountName: ".v-data-table__wrapper td",
+	},
+	loadIcon: ".loader-container",
+	adminEditingSwitch: ".editing-switch-container input[role='switch']",
+	adminEditingButton: ".editing-switch-container .editing-switch",
+	clickUser: "(//table//tr/td//div[contains(@class, 'v-list-item__content') and contains(@class, 'names')])[1]",
+	clickOnBreadCrumbUser: "//a[contains(@class, 'v-breadcrumbs__item') and contains(text(), 'Users')]",
+	userStatus: "//div[contains(@class, 'badge-container') and contains(@class, 'invited')]",
+	userHeaderName: "//p[contains(@class, 'account-header-name')]",
+	userEmail: "//p[contains(@class, 'account-header-email') and contains(text(), '@')]",
+	activeTab: "//div[contains(@class, 'v-tab--active')]",
+};

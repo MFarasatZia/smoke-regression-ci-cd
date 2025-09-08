@@ -1,0 +1,497 @@
+# bitbucket-pipelines.yml
+# Base image with Playwright browsers & deps
+image: mcr.microsoft.com/playwright:v1.49.1-jammy
+
+# ====================================================
+# 1) PIPELINES
+# ====================================================
+pipelines:
+  branches:
+    main:
+      - step:
+          name: Main Workflow
+          runs-on:
+            - self.hosted
+            - linux
+          caches:
+            - node
+          script:
+            - echo "📦 Installing dependencies"
+            - npm install
+            - echo "🎨 Running Prettier"
+            - npm run prettier
+            - echo "🧹 Running ESLint"
+            - npm run lint
+            # Example: enable to run baseline E2E on main
+            # - npx playwright install --with-deps chromium
+            # - npm run test --ENV=DEV --HEADLESS=True --TAG=@automated
+
+  custom:
+    regression-api-test:
+      - step:
+          name: Regression API Test
+          runs-on: [ self.hosted, linux ]
+          max-time: 180
+          caches: [ node ]
+          script:
+            - node -v
+            - npm install
+
+            # All values are expected from Bitbucket Repository/Workspace Variables
+            - echo "✅ Exporting environment variables"
+            - export ENV="${ENV}"                        # e.g. DEV
+            - export HEADLESS="${HEADLESS}"              # e.g. true
+            - export TAGS="${TAGS}"                      # e.g. @regression
+            - export BASE_URL="${BASE_URL}"              # e.g. https://app.dev.example.com
+            - export BASE_URL_ADMIN_PANEL="${BASE_URL_ADMIN_PANEL}"  # e.g. https://admin.dev.example.com
+            - export API_BASE_URL="${API_BASE_URL}"      # e.g. https://api.dev.example.com
+            - export DEFAULT_SIGN_IN_USER="${DEFAULT_SIGN_IN_USER}"  # e.g. dev_user@example.com
+
+            # Mail provider (dummy placeholders)
+            - export MAILTRAP_INBOX="${MAILTRAP_INBOX}"                  # e.g. 9999999
+            - export MAILTRAP_API_KEY="${MAILTRAP_API_KEY}"              # e.g. 00000000000000000000000000000000
+            - export MAILTRAP_TOKEN="${MAILTRAP_TOKEN}"                  # e.g. eyJhbGciOiJ...
+            - export MAILTRAP_ACCOUNT_ID="${MAILTRAP_ACCOUNT_ID}"        # e.g. 1234567
+
+            # Sample app/account IDs (dummy)
+            - export ACCOUNT_ID="${ACCOUNT_ID}"                          # e.g. 100
+            - export MUL_ACCOUNT_ID="${MUL_ACCOUNT_ID}"                  # e.g. 200
+
+            - bash helpers/runner/DEV/API/regressionApi.sh || true
+
+            - mkdir -p artifacts/test-results/html-report
+            - cp -r test-results/html-report/* artifacts/test-results/html-report/ || true
+
+            # Slack webhook lives in CI variables as SLACK_WEBHOOK_URL
+            - |
+              curl -X POST -H 'Content-type: application/json' --data '{
+                "text": "*Regression API Test Results*",
+                "attachments": [
+                  {
+                    "title": "Test report uploaded as Bitbucket Artifact",
+                    "text": "Check Artifacts tab in Bitbucket Pipelines.",
+                    "color": "#36a64f"
+                  }
+                ]
+              }' "${SLACK_WEBHOOK_URL}"
+          artifacts:
+            - artifacts/test-results/html-report/**
+
+    regression-web-ui-test:
+      - step:
+          name: Regression Web UI Test
+          runs-on: [ self.hosted, linux ]
+          max-time: 180
+          caches: [ node ]
+          script:
+            - node -v
+            - npm install
+            - npx playwright install
+
+            - echo "✅ Exporting environment variables"
+            - export ENV="${ENV}"
+            - export HEADLESS="${HEADLESS}"
+            - export TAGS="${TAGS}"
+            - export BASE_URL="${BASE_URL}"                          # https://app.dev.example.com
+            - export BASE_URL_ADMIN_PANEL="${BASE_URL_ADMIN_PANEL}"  # https://admin.dev.example.com
+            - export API_BASE_URL="${API_BASE_URL}"                  # https://api.dev.example.com
+            - export DEFAULT_SIGN_IN_USER="${DEFAULT_SIGN_IN_USER}"
+
+            - export MAILTRAP_INBOX="${MAILTRAP_INBOX}"
+            - export MAILTRAP_API_KEY="${MAILTRAP_API_KEY}"
+            - export MAILTRAP_TOKEN="${MAILTRAP_TOKEN}"
+            - export MAILTRAP_ACCOUNT_ID="${MAILTRAP_ACCOUNT_ID}"
+            - export ACCOUNT_ID="${ACCOUNT_ID}"
+            - export MUL_ACCOUNT_ID="${MUL_ACCOUNT_ID}"
+
+            - bash helpers/runner/DEV/WEB/regression.sh || true
+
+            - mkdir -p artifacts/test-results/html-report
+            - cp -r test-results/html-report/* artifacts/test-results/html-report/ || true
+
+            - |
+              curl -X POST -H 'Content-type: application/json' --data '{
+                "text": "*Regression Web UI Test Results*",
+                "attachments": [
+                  {
+                    "title": "Test report uploaded as Bitbucket Artifact",
+                    "text": "Check Artifacts tab in Bitbucket Pipelines.",
+                    "color": "#36a64f"
+                  }
+                ]
+              }' "${SLACK_WEBHOOK_URL}"
+          artifacts:
+            - artifacts/test-results/html-report/**
+
+    smoke-api-test:
+      - step:
+          name: Smoke API Test Workflow
+          runs-on: [ self.hosted, linux ]
+          caches: [ node ]
+          script:
+            - echo " Set up Node.js"
+            - node -v
+            - echo " Install Dependencies"
+            - npm install
+            - echo " Install Playwright system dependencies"
+            - npx playwright install-deps
+            - echo " Install Playwright Browsers"
+            - npx playwright install
+
+            - echo " Exporting environment variables"
+            - export ENV="${ENV}"
+            - export HEADLESS="${HEADLESS}"
+            - export TAGS="${TAGS}"
+            - export BASE_URL="${BASE_URL}"
+            - export BASE_URL_ADMIN_PANEL="${BASE_URL_ADMIN_PANEL}"
+            - export API_BASE_URL="${API_BASE_URL}"
+            - export DEFAULT_SIGN_IN_USER="${DEFAULT_SIGN_IN_USER}"
+            - export MAILTRAP_INBOX="${MAILTRAP_INBOX}"
+            - export MAILTRAP_API_KEY="${MAILTRAP_API_KEY}"
+            - export MAILTRAP_TOKEN="${MAILTRAP_TOKEN}"
+            - export MAILTRAP_ACCOUNT_ID="${MAILTRAP_ACCOUNT_ID}"
+            - export ACCOUNT_ID="${ACCOUNT_ID}"
+            - export MUL_ACCOUNT_ID="${MUL_ACCOUNT_ID}"
+
+            - echo " Run smoke test"
+            - bash helpers/runner/DEV/API/smokeApi.sh || true
+
+            - echo " Upload HTML Report as Artifact"
+            - mkdir -p artifacts/test-results/html-report
+            - cp -r test-results/html-report/* artifacts/test-results/html-report/ || echo " No report found"
+
+            - echo " Send Report to Slack"
+            - |
+              curl -X POST -H 'Content-type: application/json' --data '{
+                "text": " *Smoke API Test Results*",
+                "attachments": [
+                  {
+                    "title": "Test report uploaded as Bitbucket Artifact",
+                    "text": "Download the report from the *Artifacts* section of this workflow run in Bitbucket.",
+                    "color": "#36a64f"
+                  }
+                ]
+              }' "${SLACK_WEBHOOK_URL}"
+          artifacts:
+            - artifacts/test-results/html-report/**
+
+    smoke-web-ui-test:
+      - step:
+          name: Smoke Web UI Test
+          runs-on: [ self.hosted, linux ]
+          caches: [ node ]
+          script:
+            - echo " Set up Node.js"
+            - node -v
+            - echo " Install Dependencies"
+            - npm install
+            - echo " Install Playwright Browsers"
+            - npx playwright install
+
+            - echo " Exporting environment variables"
+            - export ENV="${ENV}"
+            - export HEADLESS="${HEADLESS}"
+            - export TAGS="${TAGS}"
+            - export BASE_URL="${BASE_URL}"
+            - export BASE_URL_ADMIN_PANEL="${BASE_URL_ADMIN_PANEL}"
+            - export API_BASE_URL="${API_BASE_URL}"
+            - export DEFAULT_SIGN_IN_USER="${DEFAULT_SIGN_IN_USER}"
+            - export MAILTRAP_INBOX="${MAILTRAP_INBOX}"
+            - export MAILTRAP_API_KEY="${MAILTRAP_API_KEY}"
+            - export MAILTRAP_TOKEN="${MAILTRAP_TOKEN}"
+            - export MAILTRAP_ACCOUNT_ID="${MAILTRAP_ACCOUNT_ID}"
+            - export ACCOUNT_ID="${ACCOUNT_ID}"
+            - export MUL_ACCOUNT_ID="${MUL_ACCOUNT_ID}"
+
+            - bash helpers/runner/DEV/WEB/smoke.sh; EXIT_CODE=$?
+            - if [ -n "$EXIT_CODE" ]; then echo "❌ Smoke test failed with exit code $EXIT_CODE"; else echo "✅ Smoke test completed successfully"; fi
+
+            - echo " Upload HTML Report as Artifact"
+            - mkdir -p artifacts/test-results/html-report
+            - cp -r test-results/html-report/* artifacts/test-results/html-report/ || true
+
+            - echo " Send Report to Slack"
+            - |
+              curl -X POST -H 'Content-type: application/json' --data '{
+                "text": " *Smoke Web UI Test Results*",
+                "attachments": [
+                  {
+                    "title": "Test report uploaded as Bitbucket Artifact",
+                    "text": "Download the report from the *Artifacts* tab in this pipeline run.",
+                    "color": "#36a64f"
+                  }
+                ]
+              }' "${SLACK_WEBHOOK_URL}"
+          artifacts:
+            - artifacts/test-results/html-report/**
+
+    regression-api-test-staging:
+      - step:
+          name: Regression API Test Staging
+          runs-on: [ self.hosted, linux ]
+          max-time: 180
+          caches: [ node ]
+          script:
+            - node -v
+            - npm install
+
+            - export ENV="${ENV}"                     # e.g. STAGING
+            - export HEADLESS="${HEADLESS}"
+            - export TAGS="${TAGS}"
+            - export BASE_URL="${BASE_URL_STAGING}"               # https://app.staging.example.com
+            - export BASE_URL_ADMIN_PANEL="${BASE_URL_ADMIN_STAGING}"
+            - export API_BASE_URL="${API_BASE_URL_STAGING}"
+            - export DEFAULT_SIGN_IN_USER="${DEFAULT_SIGN_IN_USER_STAGING}"
+            - export MAILTRAP_INBOX="${MAILTRAP_INBOX}"
+            - export MAILTRAP_API_KEY="${MAILTRAP_API_KEY}"
+            - export MAILTRAP_TOKEN="${MAILTRAP_TOKEN}"
+            - export MAILTRAP_ACCOUNT_ID="${MAILTRAP_ACCOUNT_ID}"
+            - export ACCOUNT_ID="${ACCOUNT_ID}"
+            - export MUL_ACCOUNT_ID="${MUL_ACCOUNT_ID}"
+
+            - bash helpers/runner/STAGING/API/regressionApi.sh || true
+
+            - mkdir -p artifacts/test-results/html-report
+            - cp -r test-results/html-report/* artifacts/test-results/html-report/ || true
+
+            - |
+              curl -X POST -H 'Content-type: application/json' --data '{
+                "text": " *Regression API Staging Test Results*",
+                "attachments": [
+                  {
+                    "title": "Test report uploaded as Bitbucket Artifact",
+                    "text": "Download the report from the *Artifacts* section of this workflow run.",
+                    "color": "#36a64f"
+                  }
+                ]
+              }' "${SLACK_WEBHOOK_URL}"
+          artifacts:
+            - artifacts/test-results/html-report/**
+
+    regression-web-ui-test-staging:
+      - step:
+          name: Regression Web UI Test Staging
+          runs-on: [ self.hosted, linux ]
+          max-time: 180
+          caches: [ node ]
+          script:
+            - node -v
+            - npm install
+            - npx playwright install
+
+            - export ENV="${ENV}"
+            - export HEADLESS="${HEADLESS}"
+            - export TAGS="${TAGS}"
+            - export BASE_URL="${BASE_URL_STAGING}"               # https://app.staging.example.com
+            - export BASE_URL_ADMIN_PANEL="${BASE_URL_ADMIN_STAGING}"
+            - export API_BASE_URL="${API_BASE_URL_STAGING}"
+            - export DEFAULT_SIGN_IN_USER="${DEFAULT_SIGN_IN_USER_STAGING}"
+            - export MAILTRAP_INBOX="${MAILTRAP_INBOX}"
+            - export MAILTRAP_API_KEY="${MAILTRAP_API_KEY}"
+            - export MAILTRAP_TOKEN="${MAILTRAP_TOKEN}"
+            - export ACCOUNT_ID="${ACCOUNT_ID}"
+            - export MUL_ACCOUNT_ID="${MUL_ACCOUNT_ID}"
+
+            - bash helpers/runner/STAGING/WEB/regression.sh || true
+
+            - mkdir -p artifacts/test-results/html-report
+            - cp -r test-results/html-report/* artifacts/test-results/html-report/ || true
+
+            - |
+              curl -X POST -H 'Content-type: application/json' --data '{
+                "text": " *Regression Web UI Staging Test Results*",
+                "attachments": [
+                  {
+                    "title": "Test report uploaded as Bitbucket Artifact",
+                    "text": "Download the report from the *Artifacts* section of this workflow run.",
+                    "color": "#36a64f"
+                  }
+                ]
+              }' "${SLACK_WEBHOOK_URL}"
+          artifacts:
+            - artifacts/test-results/html-report/**
+
+    smoke-api-test-staging:
+      - step:
+          name: Smoke API Test Staging
+          runs-on: [ self.hosted, linux ]
+          caches: [ node ]
+          script:
+            - node -v
+            - npm install
+
+            - export ENV="${ENV}"
+            - export HEADLESS="${HEADLESS}"
+            - export TAGS="${TAGS}"
+            - export BASE_URL="${BASE_URL_STAGING}"
+            - export BASE_URL_ADMIN_PANEL="${BASE_URL_ADMIN_STAGING}"
+            - export API_BASE_URL="${API_BASE_URL_STAGING}"
+            - export DEFAULT_SIGN_IN_USER="${DEFAULT_SIGN_IN_USER_STAGING}"
+            - export MAILTRAP_INBOX="${MAILTRAP_INBOX}"
+            - export MAILTRAP_API_KEY="${MAILTRAP_API_KEY}"
+            - export MAILTRAP_TOKEN="${MAILTRAP_TOKEN}"
+            - export MAILTRAP_ACCOUNT_ID="${MAILTRAP_ACCOUNT_ID}"
+            - export ACCOUNT_ID="${ACCOUNT_ID}"
+            - export MUL_ACCOUNT_ID="${MUL_ACCOUNT_ID}"
+
+            - bash helpers/runner/STAGING/API/smokeApi.sh || true
+
+            - mkdir -p artifacts/test-results/html-report
+            - cp -r test-results/html-report/* artifacts/test-results/html-report/ || true
+
+            - |
+              curl -X POST -H 'Content-type: application/json' --data '{
+                "text": " *Smoke API Staging Test Results*",
+                "attachments": [
+                  {
+                    "title": "Test report uploaded as Bitbucket Artifact",
+                    "text": "Download the report from the *Artifacts* section of this workflow run.",
+                    "color": "#36a64f"
+                  }
+                ]
+              }' "${SLACK_WEBHOOK_URL}"
+          artifacts:
+            - artifacts/test-results/html-report/**
+
+    smoke-web-ui-test-staging:
+      - step:
+          name: Smoke Web UI Test Staging
+          runs-on: [ self.hosted, linux ]
+          caches: [ node ]
+          script:
+            - node -v
+            - npm install
+            - npx playwright install
+
+            - export ENV="${ENV}"
+            - export HEADLESS="${HEADLESS}"
+            - export TAGS="${TAGS}"
+            - export BASE_URL="${BASE_URL_STAGING}"               # https://account.staging.example.com
+            - export BASE_URL_ADMIN_PANEL="${BASE_URL_ADMIN_STAGING}"  # https://admin.staging.example.com
+            - export API_BASE_URL="${API_BASE_URL_STAGING}"            # https://api.staging.example.com
+            - export DEFAULT_SIGN_IN_USER="${DEFAULT_SIGN_IN_USER_STAGING}"
+            - export MAILTRAP_INBOX="${MAILTRAP_INBOX}"
+            - export MAILTRAP_API_KEY="${MAILTRAP_API_KEY}"
+            - export MAILTRAP_TOKEN="${MAILTRAP_TOKEN}"
+            - export MAILTRAP_ACCOUNT_ID="${MAILTRAP_ACCOUNT_ID}"
+            - export ACCOUNT_ID="${ACCOUNT_ID}"
+            - export MUL_ACCOUNT_ID="${MUL_ACCOUNT_ID}"
+
+            - bash helpers/runner/STAGING/WEB/smoke.sh || true
+
+            - mkdir -p artifacts/test-results/html-report
+            - cp -r test-results/html-report/* artifacts/test-results/html-report/ || true
+
+            - |
+              curl -X POST -H 'Content-type: application/json' --data '{
+                "text": " *Smoke Web UI Staging Test Results*",
+                "attachments": [
+                  {
+                    "title": "Test report uploaded as Bitbucket Artifact",
+                    "text": "Download the report from the *Artifacts* section of this workflow run.",
+                    "color": "#36a64f"
+                  }
+                ]
+              }' "${SLACK_WEBHOOK_URL}"
+          artifacts:
+            - artifacts/test-results/html-report/**
+
+    regression-api-prod:
+      - step:
+          name: Regression API Prod
+          runs-on: [ self.hosted, linux ]
+          max-time: 180
+          caches: [ node ]
+          script:
+            - node -v
+            - npm install
+
+            - export BASE_URL_PROD="${BASE_URL_PROD}"                            # https://app.example.com
+            - export BASE_URL_ADMIN_PANEL_PROD="${BASE_URL_ADMIN_PANEL_PROD}"    # https://admin.example.com
+            - export API_BASE_URL_PROD="${API_BASE_URL_PROD}"                    # https://api.example.com
+            - export DEFAULT_SIGN_IN_USER_PROD="${DEFAULT_SIGN_IN_USER_PROD}"
+            - export MAILTRAP_INBOX="${MAILTRAP_INBOX}"
+            - export MAILTRAP_API_KEY="${MAILTRAP_API_KEY}"
+            - export MAILTRAP_TOKEN="${MAILTRAP_TOKEN}"
+            - export MAILTRAP_ACCOUNT_ID="${MAILTRAP_ACCOUNT_ID}"
+            - export ACCOUNT_ID="${ACCOUNT_ID}"
+            - export MUL_ACCOUNT_ID="${MUL_ACCOUNT_ID}"
+
+            - bash helpers/runner/DEV/API/regressionApi.sh || true
+
+            - mkdir -p artifacts/test-results/html-report
+            - cp -r test-results/html-report/* artifacts/test-results/html-report/ || true
+
+            - |
+              curl -X POST -H 'Content-type: application/json' --data '{
+                "text": "*Regression API Prod Results*",
+                "attachments": [
+                  {
+                    "title": "Test report uploaded as Bitbucket Artifact",
+                    "text": "Check Artifacts tab in Bitbucket Pipelines.",
+                    "color": "#36a64f"
+                  }
+                ]
+              }' "${SLACK_WEBHOOK_URL}"
+          artifacts:
+            - artifacts/test-results/html-report/**
+
+    regression-web-ui-prod:
+      - step:
+          name: Regression Web UI Prod
+          runs-on: [ self.hosted, linux ]
+          max-time: 180
+          caches: [ node ]
+          script:
+            - node -v
+            - npm install
+            - npx playwright install
+
+            - export BASE_URL_PROD="${BASE_URL_PROD}"
+            - export BASE_URL_ADMIN_PANEL_PROD="${BASE_URL_ADMIN_PANEL_PROD}"
+            - export API_BASE_URL_PROD="${API_BASE_URL_PROD}"
+            - export DEFAULT_SIGN_IN_USER_PROD="${DEFAULT_SIGN_IN_USER_PROD}"
+            - export MAILTRAP_INBOX="${MAILTRAP_INBOX}"
+            - export MAILTRAP_API_KEY="${MAILTRAP_API_KEY}"
+            - export MAILTRAP_TOKEN="${MAILTRAP_TOKEN}"
+            - export ACCOUNT_ID="${ACCOUNT_ID}"
+            - export MUL_ACCOUNT_ID="${MUL_ACCOUNT_ID}"
+
+            - bash helpers/runner/STAGING/WEB/regression.sh || true
+
+            - mkdir -p artifacts/test-results/html-report
+            - cp -r test-results/html-report/* artifacts/test-results/html-report/ || true
+
+            - |
+              curl -X POST -H 'Content-type: application/json' --data '{
+                "text": "*Regression Web UI Prod Test Results*",
+                "attachments": [
+                  {
+                    "title": "Test report uploaded as Bitbucket Artifact",
+                    "text": "Download the report from the *Artifacts* section of this pipeline run.",
+                    "color": "#36a64f"
+                  }
+                ]
+              }' "${SLACK_WEBHOOK_URL}"
+          artifacts:
+            - artifacts/test-results/html-report/**
+
+# ====================================================
+# 2) SCHEDULES (examples – keep disabled in repo)
+# ====================================================
+# schedules:
+#   - cron: "30 3 * * 1,4"
+#     enabled: false
+#     pipeline: regression-api-test
+#
+#   - cron: "0 0 * * 1,4"
+#     enabled: false
+#     pipeline: regression-web-ui-test
+#
+#   - cron: "0 */6 * * *"
+#     enabled: false
+#     pipeline: smoke-api-test
+#
+#   - cron: "0 */6 * * *"
+#     enabled: false
+#     pipeline: smoke-web-ui-test

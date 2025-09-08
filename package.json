@@ -1,0 +1,65 @@
+{
+	"name": "cyborg",
+	"version": "1.0.0",
+	"description": "Playwright automation framework",
+	"engines": {
+		"node": ">=16.0.0"
+	},
+	"main": "index.js",
+	"scripts": {
+		"pretest": "npx ts-node helpers/report/init.ts",
+		"test": "cross-env cucumber-js --config=config/cucumber.js",
+		"posttest": "cross-env npx ts-node helpers/report/reportHelper.ts && cross-env npx ts-node helpers/report/uploadReport.ts",
+		"test:failed": "cucumber-js -p rerun @rerun.txt || npm run posttest",
+		"prepare": "husky install",
+		"lint": "eslint . --ext .js,.ts --fix",
+		"prettier": "prettier --write ."
+	},
+	"keywords": [],
+	"author": "Ahsan Subhani",
+	"license": "ISC",
+	"devDependencies": {
+		"@cucumber/cucumber": "^9.4.0",
+		"@faker-js/faker": "^8.4.1",
+		"@playwright/test": "^1.42.1",
+		"@types/fs-extra": "^11.0.4",
+		"@types/sax": "^1.2.6",
+		"@typescript-eslint/eslint-plugin": "^6.4.1",
+		"@typescript-eslint/parser": "^6.4.1",
+		"axios": "^1.7.7",
+		"config": "^3.3.11",
+		"cross-env": "^7.0.3",
+		"cucumber-html-reporter": "^7.2.0",
+		"dotenv": "^16.4.5",
+		"eslint": "^8.57.1",
+		"eslint-plugin-playwright": "^0.15.3",
+		"eslint-plugin-prettier": "^5.0.1",
+		"exceljs": "^4.3.0",
+		"fs-extra": "^11.3.0",
+		"googleapis": "^105.0.0",
+		"husky": "^8.0.3",
+		"lint-staged": "^14.0.1",
+		"mailtrap": "^3.3.0",
+		"pdf-parse": "^1.1.1",
+		"playwright": "^1.53.2",
+		"pptx-text-parser": "^1.1.1",
+		"prettier": "^3.0.3",
+		"source-map-support": "^0.5.21",
+		"tesseract.js": "^5.0.2",
+		"ts-node": "^10.9.1",
+		"unzipper": "^0.10.14"
+	},
+	"dependencies": {
+		"@types/nodemailer": "^6.4.14",
+		"faker": "^6.6.6",
+		"nodemailer": "^6.9.10",
+		"uuid": "^11.0.3",
+		"winston": "^3.10.0"
+	},
+	"lint-staged": {
+		"**/*.{js,ts,json}": [
+			"prettier --write",
+			"eslint --fix"
+		]
+	}
+}

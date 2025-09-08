@@ -1,0 +1,17 @@
+{
+	"Dev": {
+		"email": "single.automation@exiqtive.com",
+		"multiple_accounts_email": "single.automation@exiqtive.com",
+		"password": "aaaa",
+		"super_user_email": "admin@exiqtive.com",
+		"super_user_password": "#C92iyRN$LeV"
+	},
+
+	"Stg": {
+		"email": "single.automation@exiqtive.com",
+		"multiple_accounts_email": "multiple.automation@exiqtive.com",
+		"password": "aaaa",
+		"super_user_email": "admin@exiqtive.com",
+		"super_user_password": "#C92iyRN$LeV"
+	}
+}

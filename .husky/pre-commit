@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Source shell profile to get proper PATH for Node.js
+if [ -f ~/.zshrc ]; then
+    . ~/.zshrc
+elif [ -f ~/.bash_profile ]; then
+    . ~/.bash_profile
+elif [ -f ~/.bashrc ]; then
+    . ~/.bashrc
+fi
+
+# Try to find npx in common locations
+if command -v npx >/dev/null 2>&1; then
+    npx lint-staged
+elif [ -f "$(dirname -- "$0")/../node_modules/.bin/npx" ]; then
+    "$(dirname -- "$0")/../node_modules/.bin/npx" lint-staged
+else
+    echo "Warning: npx not found, skipping lint-staged"
+    exit 0
+fi

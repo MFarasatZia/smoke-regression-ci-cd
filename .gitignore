@@ -1,0 +1,15 @@
+node_modules/
+/playwright-report/
+/playwright/.cache/
+test-results/
+@rerun.txt
+/credentials.json
+/token.json
+helpers/environment/
+cucumber-report.html
+helpers/environment/.env.DEV
+helpers/environment/.env.STAGING
+.idea
+.eslintignore
+steps/.DS_Store
+steps/owner/.DS_Store

@@ -1,0 +1,160 @@
+export const elements = {
+	header: {
+		settingsHeading: "//h1[normalize-space()='Settings']",
+	},
+	verifySuspendModal: "(//h3[normalize-space()='Suspend Access'])[1]",
+	suspendBtn: "(//span[contains(text(),'Suspend')])[2]",
+	clickOnSuspendUser:
+		"//button[@data-v-7d511b90 and contains(@class, 'storybook-button--btn-normal-destructive')]/span[text()='Suspend']",
+	isRenameActive: "//button[@disabled='disabled']//span[1]",
+	verifyRenameBtnActive:
+		"//button[@type='button' and contains(@class, 'storybook-button') and contains(@class, 'btn-normal-active') and .//span[text()='Rename']]",
+	selectRenameOption: "//div[@role='menu']//span[contains(text(),'Rename')]",
+	verifyNOUserFoundText: "//div[normalize-space()='No Users found']",
+
+	badge: {
+		status: (name: string) => `(//span[contains(text(),'${name}')])[1]`,
+	},
+	modals: {
+		renameModal: {
+			firstNameField: "(//div[contains(@class, 'v-dialog--active')]//input[@data-testid='search-input'])[1]",
+			lastNameField: "(//div[contains(@class, 'v-dialog--active')]//input[@data-testid='search-input'])[2]",
+		},
+		transferOwnershipModal: {
+			userSelectionDropdownList: ".v-select__selections",
+			userSelectionSearchBar: "input[placeholder=\"Search a user\"]",
+			switchOwnerButton: "//span[text()='Switch Owner']/ancestor::button",
+			firstResultsInList: ".ownership-list-view > div",
+		},
+	},
+
+	filterButton: "//button[@class='search-bar']",
+	filterModal: {
+		statusHeader: "//div[normalize-space()='Status']",
+		employeeHeader: "//div[normalize-space()='Employee']",
+
+		statusFilter: {
+			option: (status: string) =>
+				`//div[contains(text(),'Status')]/parent::div//span[normalize-space()='${status}']/parent::*/span/button`,
+		},
+		saveFilter: "//button[normalize-space()='Save Filter']",
+	},
+
+	filterStatus: {
+		name: (filter: string) => `//span[@class='label align-center ml-1'][normalize-space()='${filter}']`,
+	},
+
+	tabMenu: {
+		hortizontalMenu: "//div[@role='tab']",
+		settingsTab: "//a[normalize-space(.)='Settings' and @href='/settings']",
+		usersTab: "//div[@role='tab' and @data-test='Users']",
+	},
+	searchField: "(//input[@data-testid='search-input'])[2]",
+	coOwnerBadge: "(//span[normalize-space()='Co-Owner'])[1]",
+	appsBadge: "(//*[name()='svg'])[2]",
+	addUserButton: "//button[normalize-space()='Add user']",
+	getFirstUserName: "(//div[@class='v-list-item__content mr-2 names']//child::div[1])[1]",
+	userThreeDot: "//div[@class='org-menu']//div[@class='ex-generic-selector-default-activator']",
+	users: {
+		addButton: "//span[normalize-space()='Add']",
+		activeBadge: "//span[@aria-label='Badge']",
+		accessBadge: (access: string) => `(//span[normalize-space()='${access}'])[1]`,
+		usersList: "//div[@class='v-data-table__wrapper']//tbody",
+		previousPageButton: "//button[normalize-space()='Previous']",
+		numberOfUserInList: "//div[@class='v-list-item__title']",
+		getSecondUserName: "(//div[@class='v-list-item__content mr-2 names']//child::div[1])[2]",
+		firstUser: "(//div[@class='v-list-item__content mr-2 names']//child::div[1])[1]",
+
+		userFullNameVisibleInList: (name: string) => `//div[@data-testid='usercard-name-${name}']`,
+		nextPageButton: "//button[normalize-space()='Next']",
+		searchInputField: "//*[@data-testid='search-input']",
+		ownerAccess: "//span[normalize-space()='Owner']",
+		ownerMenuIcon: "//td[normalize-space()='Owner']/following-sibling::td//div[@class='employee_availability_icon']",
+		suspendOwnerOption: "//span[normalize-space()='Suspended']",
+		userMenuIcon: (name: string) =>
+			`//div[contains(.,'${name}')]//ancestor::td/following-sibling::td//div[@class='employee_availability_icon']`,
+		userAccess: (access: string) => `//li[normalize-space()='${access}']`,
+		addUserModal: {
+			addUserPopup: "//div[@class='pop-up']",
+			emailInput: "//label[normalize-space()='Enter user email']/following-sibling::input",
+			existingUserValidationMessage: "//p[normalize-space()='User already exists and has access in the account.']",
+			backBtn: "//button[normalize-space()='< Back']",
+			nextBtn: "//span[normalize-space()='Next']",
+			modalTextElement: (firstName: string, lastName: string, mark: string) =>
+				`//p[@class='text-black-500 mb-2' and contains(text(), 'What kind of access do you need for ${firstName} ${lastName} ${mark}')]`,
+			confirmBtn: "//button[normalize-space()='Confirm']/span",
+			firstNameInput: "//label[normalize-space()='Enter user First Name']",
+			lastNameInput: "//div[@id='lastname']/child::div//input",
+			coownerRadio: "//p[normalize-space()='Co-Owner']",
+			appsUserRadio: "//p[normalize-space()='Apps user']",
+			OperatorRadio: "//p[normalize-space()='Operator']",
+			appsCheckbox: (text) => `//span[text()='${text}']/ancestor::span/following-sibling::div//input[@type='checkbox']`,
+			appsCheckboxList: ".modal_content .app-checkbox input",
+		},
+	},
+
+	settingsMenu: {
+		options: (option: string) => `//div[@role= 'tab' and contains(.,'${option}')]`,
+	},
+	threeDotMenu: "//div[@class='icon-container']",
+	threeDotMenuOption: {
+		options: (option: string) => `//div[@role='menu']//span[contains(text(),'${option}')]`,
+	},
+
+	resendOption: "(//span[contains(text(),'Resend Invite')])[1]",
+	changePassword: "(//span[contains(text(),'Change Password')])[1]",
+	resendButton: "//button[normalize-space() = 'Resend']",
+	renameButton: "(//span[contains(text(),'Rename')])[1]",
+	clickCancelInvite: "//span[normalize-space()='Cancel']",
+	NoUserFoundDisplay: "//div[@class='no-record' and text()=' No Users found ']",
+	toast: "//div[@class='Vue-Toastification__toast Vue-Toastification__toast--success top-right']",
+	userBadge: {
+		badge: (status: string) => `(//span[normalize-space()='${status}'])[1]`,
+	},
+	integrationOptionsDisplayed: "//div[@class='container px-6 container--fluid']",
+	newPassword: "//input[@id='input-26']",
+	confirmPassword: "//input[@id='input-32']",
+	resetPassBtn: "//button[normalize-space() = 'Reset password']",
+	continueBtn: "//button[normalize-space() ='Continue']",
+	signInBtn: "//button[normalize-space() ='Sign in']",
+	verifyTheError: (error: string) => `//div[contains(@class, 'v-messages__message') and text()='${error}']`,
+	clickOnXIcon: "//button[contains(@class, 'modal-close-btn')]//i[contains(@class, 'mdi-close')]",
+	currenciesCard: "(//span[@class='panel-title-class'][normalize-space()='Currencies'])[2]",
+	currencyPageLabel: "//span[@class='currency-view-title']",
+	backBtn: "//div[@class='back-icon']",
+	clearBtn: "//button[@aria-label='Clear ']",
+	selectCurrencyLabel: "//label[@class='response-label-class']",
+	currencySearch: "(//div[@class = 'v-text-field__slot'])[2]",
+	currencyList: "//div[@class = 'list-picker-container']",
+	firstCurrency: "//div[@class = 'v-list-item__content selector-list-items']",
+	firstInvitedText: "//span[@class='first-invited-text' and contains(text(), 'First invited:')]",
+	searchInputCheck: "(//input[@data-testid='search-input'])[2]",
+	clickOnDirectoriesCard: "(//span[@class='panel-title-class'][normalize-space()='Directories'])[2]",
+	verifyToggleText: (text: string) => `(//span[normalize-space()='${text}'])[1]`,
+	clickOnBreadCrumb: "(//a[normalize-space()='Configuration'])[1]",
+	addCurrencyButton: "//button[normalize-space()='Add Currency']",
+	addCurrencyModel: "//div[@class='v-dialog v-dialog--active']",
+	clickOnCountriesCard: "(//span[@class='panel-title-class'][normalize-space()='Countries'])[2]",
+	addCountryButton: "//button[contains(@class, 'search-add-btn') and contains(., 'Add Country')]",
+	addCountryModelButton:
+		"//p[contains(text(),'You are about to add an Operating Country')]/following::button[normalize-space()='Add Country']",
+	countryIsAdded: "//tr[@class='dx-row dx-data-row dx-column-lines'][1]",
+	clickOnChatterIcon: "//tr[td[normalize-space()='Albania']]//div[contains(@class, 'v-responsive__content')]",
+	verifyChatterModelIsExpandable:
+		"//nav[contains(@class, 'v-navigation-drawer--right')]//div[contains(@class, 'v-navigation-drawer__content')]",
+	ChatterModelTextTitle: "//div[@class='v-list-item__title chatter-text-title']",
+	chatterAccountVerification: "//div[@class='user-name me-4' and text()='Single Automation']",
+	chatterDayLabel: "//div[@class='divider']",
+	actionMenuButton: "(//*[name()='svg'][@class='icon-svg'])[1]",
+	retireOption: "//div[@role='menu']//span[contains(text(),'Retire')]",
+	retirePopup: "//h3[normalize-space()='Retire Country']",
+	retireButton: "//button[@type='button']//span[contains(text(),'Retire')]",
+	retiredCountryStatus: "(//span[@class='storybook-badge storybook-badge--retired'][normalize-space()='retired'])[1]",
+	reActivateOption: "//div[@role='menu']//span[contains(text(),'Re-Activate')]",
+	reActivatePopup: "//h3[normalize-space()='Re-Activate Country']",
+	reActivateButton: "//button[@type='button']//span[contains(text(),'Re-Activate')]",
+	activeCountryStatus: "(//span[@class='storybook-badge storybook-badge--active'][normalize-space()='active'])[1]",
+	activeFilterChip: "//span[normalize-space()='active']//img[@alt='icon']",
+	draftFilterChip: "//span[normalize-space()='draft']//img[@alt='icon']",
+	countrySearchField: "//input[@data-testid='search-input']",
+};
